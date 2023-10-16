@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,25 +13,18 @@ import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class UserService implements UserDetailsService {
-
-    @PersistenceContext
-    private final EntityManager entityManager;
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(EntityManager entityManager, @Lazy PasswordEncoder passwordEncoder, UserRepository userRepository) {
-        this.entityManager = entityManager;
+    public UserServiceImpl(@Lazy PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -69,26 +61,23 @@ public class UserService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public List<User> allUsers() {
-        return entityManager.createQuery("from User", User.class).getResultList();
+        return userRepository.findAll();
     }
 
 
     @Transactional
     public User update(User user) {
-        return entityManager.merge(user);
+        return userRepository.save(user);
     }
 
     @Transactional
     public void deleteUser(int id) {
-        User user = entityManager.find(User.class, id);
-        if (user != null) {
-            entityManager.remove(user);
-        }
+        userRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)
     public User showUserById(int id) {
-        return entityManager.find(User.class, id);
+        return userRepository.findById(id).get();
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
-public class RoleService {
+public class RoleServiceImpl implements RoleService {
     @PersistenceContext
     private EntityManager entityManager;
 
